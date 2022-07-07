@@ -80,6 +80,6 @@ python main.py --mode test --gpu 0 --eavl_ckpt --class-name bottle
 
 ## Thanks to
 
-- [FrEiA](https://github.com/VLL-HD/FrEIA)
+- [FrEIA](https://github.com/VLL-HD/FrEIA)
 - [CFlow-AD](https://github.com/gudovskiy/cflow-ad)
 - [CSFlow](https://github.com/marco-rudolph/cs-flow)
