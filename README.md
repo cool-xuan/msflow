@@ -8,23 +8,78 @@ Unsupervised anomaly detection (UAD) attracts a lot of research interest and dri
 
 ![The framework of MSFlow](./imgs/framework.png)
 
+## Enviroment
+
+- Python 3.9
+- scikit-learn
+- scikit-image
+- PyTorch >= 1.10
+- CUDA 11.3
+- [FrEIA](https://github.com/VLL-HD/FrEIA) (Please install FrEIA following the [official installation](https://github.com/VLL-HD/FrEIA#table-of-contents))
+
+## Prepare datasets
+
+It is recommended to symlink the dataset root to `$msflow/data`.
+If your folder structure is different, you may need to change the corresponding paths in `default.py`.
+
+**For MVTec AD data**, please download from [MVTec AD download](https://www.mvtec.com/company/research/datasets/mvtec-ad). Download and extract them to `$msflow/data`, and make them look like the following data tree:
+
+```shell
+MVTec
+|-- bottle
+|-----|----- ground_truth
+|-----|----- test
+|-----|--------|------ good
+|-----|--------|------ broken_large
+|-----|--------|------ ...
+|-----|----- train
+|-----|--------|------ good
+|-- cable
+|-- ...
+```
+
+## Training and Testing
+
+All checkpoints will be saved to the working directory, which is specified by `work_dir` in the `default` file.
+
+By default, we evaluate the model on the test set after each meta epoch, you can change the pro evaluation interval by modifying the interval argument in the shell or `default` file.
+
+### Training
+
+```shell
+python main.py --mode train --gpu 0 --class-name bottle --pro-eval
+```
+
+### Testing
+
+```shell
+python main.py --mode test --gpu 0 --eavl_ckpt --class-name bottle
+```
+
+
 ## Results on the MVTec AD benchmark
 
-| Classes             | Det. AUROC | Loc. AUROC | Loc. PRO |
-| ------------------- | :--------: | :--------: | :------: |
-| Carpet              |   100.0    |    99.4    |   99.6   |
-| Grid                |    99.8    |    99.4    |   99.1   |
-| Leather             |   100.0    |    99.7    |   99.9   |
-| Tile                |   100.0    |    98.2    |   95.3   |
-| Wood                |   100.0    |    97.1    |   96.6   |
-| Bottle              |   100.0    |    99.0    |   98.5   |
-| Cable               |    99.5    |    98.5    |   93.7   |
-| Capsule             |    99.2    |    99.1    |   98.4   |
-| Hazelnut            |   100.0    |    98.7    |   96.6   |
-| Metal Nut           |   100.0    |    99.3    |   97.6   |
-| Pill                |    99.6    |    98.8    |   96.0   |
-| Screw               |    97.8    |    99.1    |   94.2   |
-| Toothbrush          |   100.0    |    98.5    |   91.6   |
-| Transistor          |   100.0    |    98.3    |   99.8   |
-| Zipper              |   100.0    |    99.2    |   99.4   |
-| **Overall Average** |  **99.7**  |  **98.8**  | **97.1** |
+| Classes             | Det. AUROC | Loc. AUROC |
+| ------------------- | :--------: | :--------: |
+| Carpet              |   100.0    |    99.4    |
+| Grid                |    99.8    |    99.4    |
+| Leather             |   100.0    |    99.7    |
+| Tile                |   100.0    |    98.2    |
+| Wood                |   100.0    |    97.1    |
+| Bottle              |   100.0    |    99.0    |
+| Cable               |    99.5    |    98.5    |
+| Capsule             |    99.2    |    99.1    |
+| Hazelnut            |   100.0    |    98.7    |
+| Metal Nut           |   100.0    |    99.3    |
+| Pill                |    99.6    |    98.8    |
+| Screw               |    97.8    |    99.1    |
+| Toothbrush          |   100.0    |    98.5    |
+| Transistor          |   100.0    |    98.3    |
+| Zipper              |   100.0    |    99.2    |
+| **Overall Average** |  **99.7**  |  **98.8**  |
+
+## Thanks to
+
+- [FrEiA](https://github.com/VLL-HD/FrEIA)
+- [CFlow-AD](https://github.com/gudovskiy/cflow-ad)
+- [CSFlow](https://github.com/marco-rudolph/cs-flow)
