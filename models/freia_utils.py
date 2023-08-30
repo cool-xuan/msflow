@@ -17,6 +17,7 @@ class FusionNet(nn.Module):
             input_channels += condition_dims
         mid_channels = input_channels // 4
         self.conv1 = nn.Conv2d(input_channels, mid_channels, 3, 1, 1)
+        self.norm = nn.LayerNorm(mid_channels)
         self.conv2 = nn.Conv2d(mid_channels, output_channels, 3, 1, 1)
         self.split_channels = in_channels_list
         self.add = add
@@ -28,6 +29,7 @@ class FusionNet(nn.Module):
 
         out = torch.cat(out, dim=1)
         out = self.conv1(out)
+        out = self.norm(out.permute(0, 2, 3, 1)).permute(0, 3, 1, 2)
         out = self.relu(out)
         out = self.conv2(out)
         out = self.relu(out)
