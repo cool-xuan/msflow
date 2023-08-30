@@ -12,7 +12,28 @@ from .freia_utils import FusionCouplingLayer
 def subnet_conv(dims_in, dims_out):
     return nn.Sequential(nn.Conv2d(dims_in, dims_in, 3, 1, 1), nn.ReLU(True), nn.Conv2d(dims_in, dims_out, 3, 1, 1))
 
-def single_parallel_flows(c_feat, c_cond, n_block, clamp_alpha, subnet=subnet_conv):
+def subnet_conv_bn(dims_in, dims_out):
+    return nn.Sequential(nn.Conv2d(dims_in, dims_in, 3, 1, 1), nn.BatchNorm2d(dims_in), nn.ReLU(True), nn.Conv2d(dims_in, dims_out, 3, 1, 1))
+
+class subnet_conv_ln(nn.Module):
+
+    def __init__(self, dim_in, dim_out):
+        super().__init__()
+        dim_mid = dim_in
+        self.conv1 = nn.Conv2d(dim_in, dim_mid, 3, 1, 1)
+        self.ln = nn.LayerNorm(dim_mid)
+        self.relu = nn.ReLU(True)
+        self.conv2 = nn.Conv2d(dim_mid, dim_out, 3, 1, 1)
+
+    def forward(self, x):
+        out = self.conv1(x)
+        out = self.ln(out.permute(0, 2, 3, 1)).permute(0, 3, 1, 2)
+        out = self.relu(out)
+        out = self.conv2(out)
+
+        return out
+
+def single_parallel_flows(c_feat, c_cond, n_block, clamp_alpha, subnet=subnet_conv_ln):
     flows = Ff.SequenceINN(c_feat, 1, 1)
     print('Build parallel flows: channels:{}, block:{}, cond:{}'.format(c_feat, n_block, c_cond))
     for k in range(n_block):
@@ -27,7 +48,7 @@ def build_msflow_model(c, c_feats):
     parallel_flows = []
     for c_feat, c_cond, n_block in zip(c_feats, c_conds, n_blocks):
         parallel_flows.append(
-            single_parallel_flows(c_feat, c_cond, n_block, clamp_alpha, subnet=subnet_conv))
+            single_parallel_flows(c_feat, c_cond, n_block, clamp_alpha, subnet=subnet_conv_ln))
     
     print("Build fusion flow with channels", c_feats)
     nodes = list()
