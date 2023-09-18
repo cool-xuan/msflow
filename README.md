@@ -1,6 +1,6 @@
 # MSFlow: Multi-Scale Normalizing Flows for Unsupervised Anomaly Detection
 
-This is an official implementation of "MSFlow: Multi-Scale Normalizing Flows for Unsupervised Anomaly Detection".
+This is an official implementation of "[MSFlow: Multi-Scale Normalizing Flows for Unsupervised Anomaly Detection](https://arxiv.org/pdf/2308.15300v1.pdf)".
 
 ## Abstract
 
