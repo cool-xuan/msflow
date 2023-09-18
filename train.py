@@ -32,7 +32,7 @@ def model_forward(c, extractor, parallel_flows, fusion_flow, image):
         z_list.append(z)
         parallel_jac_list.append(jac)
 
-    z_ist, fuse_jac = fusion_flow(z_list)
+    z_list, fuse_jac = fusion_flow(z_list)
     jac = fuse_jac + sum(parallel_jac_list)
 
     return z_list, jac
