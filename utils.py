@@ -41,8 +41,8 @@ def save_weights(epoch, parallel_flows, fusion_flow, model_name, ckpt_dir, optim
     torch.save(state, file_path)
 
 
-def load_weights(parallel_flows, fusion_flow, ckpt_dir, file_name, optimizer=None):
-    file_path = os.path.join(ckpt_dir, file_name)
+def load_weights(parallel_flows, fusion_flow, eval_ckpt, optimizer=None):
+    file_path = eval_ckpt
     print('Loading weights from {}'.format(file_path))
     state_dict = torch.load(file_path)
     

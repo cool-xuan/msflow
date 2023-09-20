@@ -18,7 +18,7 @@ def parsing_args(c):
                         help='train or test.')
     parser.add_argument('--resume', action='store_true', default=False, 
                         help='resume training or not.')
-    parser.add_argument('--eavl_ckpt', default='', type=str, 
+    parser.add_argument('--eval_ckpt', default='', type=str, 
                         help='checkpoint path for evaluation.')
     parser.add_argument('--gpu', default='0', type=str)
     parser.add_argument('--class-name', default='bottle', type=str)
@@ -45,6 +45,8 @@ def parsing_args(c):
 
     for k, v in vars(args).items():
         setattr(c, k, v)
+        
+    c.input_size = (256, 256) if c.class_name == 'transistor' else (512, 512)
 
     return c
 

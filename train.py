@@ -135,8 +135,14 @@ def train(c):
 
     start_epoch = 0
     if c.mode == 'test':
-        start_epoch = load_weights(parallel_flows, fusion_flow, c.eavl_ckpt)
-        c.meta_epochs = start_epoch + 1
+        start_epoch = load_weights(parallel_flows, fusion_flow, c.eval_ckpt)
+        epoch = start_epoch + 1
+        gt_label_list, gt_mask_list, outputs_list, size_list = inference_meta_epoch(c, epoch, test_loader, extractor, parallel_flows, fusion_flow)
+
+        anomaly_score, anomaly_score_map_add, anomaly_score_map_mul = post_process(c, size_list, outputs_list)
+        best_det_auroc, best_loc_auroc, best_loc_pro = eval_det_loc(det_auroc_obs, loc_auroc_obs, loc_pro_obs, epoch, gt_label_list, anomaly_score, gt_mask_list, anomaly_score_map_add, anomaly_score_map_mul, c.pro_eval)
+        
+        return
     
     if c.resume:
         last_epoch = load_weights(parallel_flows, fusion_flow, c.ckpt_dir, 'last.pt', optimizer)
@@ -169,7 +175,7 @@ def train(c):
 
         anomaly_score, anomaly_score_map_add, anomaly_score_map_mul = post_process(c, size_list, outputs_list)
 
-        if c.mode == 'test' or c.pro_eval and (epoch > 0 and epoch % c.pro_eval_interval == 0):
+        if c.pro_eval and (epoch > 0 and epoch % c.pro_eval_interval == 0):
             pro_eval = True
         else:
             pro_eval = False

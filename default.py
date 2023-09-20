@@ -6,7 +6,7 @@ seed = 9826
 gpu = '1'
 device = torch.device("cuda")
 mode = 'train'
-eavl_ckpt = ''
+eval_ckpt = ''
 resume = False
 
 # optimizer
@@ -28,7 +28,7 @@ data_path = './data/MVTec'
 # 'hazelnut', 'leather', 'metal_nut', 'pill', 'screw',
 # 'tile', 'toothbrush', 'transistor', 'wood', 'zipper']
 class_name = 'bottle'
-input_size = (256, 256)
+input_size = (512, 512)
 img_mean, img_std = [0.485, 0.456, 0.406], [0.229, 0.224, 0.225]
 
 # model
