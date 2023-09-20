@@ -1,3 +1,4 @@
+import os
 import time
 import datetime
 import numpy as np
@@ -145,7 +146,7 @@ def train(c):
         return
     
     if c.resume:
-        last_epoch = load_weights(parallel_flows, fusion_flow, c.ckpt_dir, 'last.pt', optimizer)
+        last_epoch = load_weights(parallel_flows, fusion_flow, os.path.join(c.ckpt_dir, 'last.pt'), optimizer)
         start_epoch = last_epoch + 1
         print('Resume from epoch {}'.format(start_epoch))
 
