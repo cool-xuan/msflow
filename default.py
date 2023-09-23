@@ -39,7 +39,7 @@ parallel_blocks = [2, 5, 8]
 clamp_alpha = 1.9
 
 # evaluation
-top_k = 0.1
+top_k = 0.03
 pro_eval = True
 pro_eval_interval = 6
 
