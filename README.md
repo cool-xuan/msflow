@@ -8,7 +8,7 @@ This is an official implementation of "[MSFlow: Multi-Scale Normalizing Flows fo
 
 ## Inmportant Notice
 
-- [2024-01-09] We have extended our code implementation to the [VisA dataset](https://amazon-visual-anomaly.s3.us-west-2.amazonaws.com/VisA_20220922.tar). AMP of pyTorch is supported in the updated version, which can accelerate the training process. Besides, the log files on the MVTec AD dataset and VisA dataset are also provided for reference (```log_mvtec.txt``` and ```log_visa.txt```).
+- [2024-01-11] We have extended our code implementation to the [VisA dataset](https://amazon-visual-anomaly.s3.us-west-2.amazonaws.com/VisA_20220922.tar). AMP of pyTorch is supported in the updated version, which can accelerate the training process. Besides, the log files on the MVTec AD dataset and VisA dataset are also provided for reference (```log_mvtec.txt``` and ```log_visa.txt```).
 
 - [2023-12-11] 🎉 Our paper has been accepted by *TNNLS 2024*, and the formal citation will be updated soon.
 
