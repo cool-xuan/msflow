@@ -2,11 +2,14 @@ import os
 import time
 import datetime
 import numpy as np
+import wandb
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torch.cuda.amp import autocast, GradScaler
 
-from datasets import MVTecDataset
+from datasets import MVTecDataset, VisADataset
 from models.extractors import build_extractor
 from models.flow_models import build_msflow_model
 from post_process import post_process
@@ -38,26 +41,39 @@ def model_forward(c, extractor, parallel_flows, fusion_flow, image):
 
     return z_list, jac
 
-def train_meta_epoch(c, epoch, loader, extractor, parallel_flows, fusion_flow, params, optimizer, warmup_scheduler, decay_scheduler):
+def train_meta_epoch(c, epoch, loader, extractor, parallel_flows, fusion_flow, params, optimizer, warmup_scheduler, decay_scheduler, scaler=None):
     parallel_flows = [parallel_flow.train() for parallel_flow in parallel_flows]
     fusion_flow = fusion_flow.train()
-    iters = len(loader)
+
     for sub_epoch in range(c.sub_epochs):
         epoch_loss = 0.
         image_count = 0
         for idx, (image, _, _) in enumerate(loader):
-            image = image.to(c.device)
-            z_list, jac = model_forward(c, extractor, parallel_flows, fusion_flow, image)
-
-            loss = 0.
-            for z in z_list:
-                loss += 0.5 * torch.sum(z**2, (1, 2, 3))
-            loss = loss - jac
-            loss = loss.mean()
             optimizer.zero_grad()
-            loss.backward()
-            torch.nn.utils.clip_grad_norm_(params, 2)
-            optimizer.step()
+            image = image.to(c.device)
+            if scaler:
+                with autocast():
+                    z_list, jac = model_forward(c, extractor, parallel_flows, fusion_flow, image)
+                    loss = 0.
+                    for z in z_list:
+                        loss += 0.5 * torch.sum(z**2, (1, 2, 3))
+                    loss = loss - jac
+                    loss = loss.mean()
+                scaler.scale(loss).backward()
+                scaler.unscale_(optimizer)
+                torch.nn.utils.clip_grad_norm_(params, 2)
+                scaler.step(optimizer)
+                scaler.update()
+            else:
+                z_list, jac = model_forward(c, extractor, parallel_flows, fusion_flow, image)
+                loss = 0.
+                for z in z_list:
+                    loss += 0.5 * torch.sum(z**2, (1, 2, 3))
+                loss = loss - jac
+                loss = loss.mean()
+                loss.backward()
+                torch.nn.utils.clip_grad_norm_(params, 2)
+                optimizer.step()
             epoch_loss += t2np(loss)
             image_count += image.shape[0]
         lr = optimizer.state_dict()['param_groups'][0]['lr']
@@ -113,9 +129,18 @@ def inference_meta_epoch(c, epoch, loader, extractor, parallel_flows, fusion_flo
 
 
 def train(c):
+    
+    if c.wandb_enable:
+        wandb.finish()
+        wandb_run = wandb.init(
+            project='65001-msflow', 
+            group=c.version_name,
+            name=c.class_name)
+    
+    Dataset = MVTecDataset if c.dataset == 'mvtec' else VisADataset
 
-    train_dataset = MVTecDataset(c, is_train=True)
-    test_dataset  = MVTecDataset(c, is_train=False)
+    train_dataset = Dataset(c, is_train=True)
+    test_dataset  = Dataset(c, is_train=False)
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=c.batch_size, shuffle=True, num_workers=c.workers, pin_memory=True)
     test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=c.batch_size, shuffle=False, num_workers=c.workers, pin_memory=True)
 
@@ -124,11 +149,17 @@ def train(c):
     parallel_flows, fusion_flow = build_msflow_model(c, output_channels)
     parallel_flows = [parallel_flow.to(c.device) for parallel_flow in parallel_flows]
     fusion_flow = fusion_flow.to(c.device)
+    # if c.wandb_enable:
+    #     for idx, parallel_flow in enumerate(parallel_flows):
+    #         wandb.watch(parallel_flow, log='all', log_freq=100, idx=idx)
+    #     wandb.watch(fusion_flow, log='all', log_freq=100, idx=len(parallel_flows))
     params = list(fusion_flow.parameters())
     for parallel_flow in parallel_flows:
         params += list(parallel_flow.parameters())
         
     optimizer = torch.optim.Adam(params, lr=c.lr)
+    if c.amp_enable:
+        scaler = GradScaler()
 
     det_auroc_obs = Score_Observer('Det.AUROC', c.meta_epochs)
     loc_auroc_obs = Score_Observer('Loc.AUROC', c.meta_epochs)
@@ -170,7 +201,7 @@ def train(c):
 
     for epoch in range(start_epoch, c.meta_epochs):
         print()
-        train_meta_epoch(c, epoch, train_loader, extractor, parallel_flows, fusion_flow, params, optimizer, warmup_scheduler, decay_scheduler)
+        train_meta_epoch(c, epoch, train_loader, extractor, parallel_flows, fusion_flow, params, optimizer, warmup_scheduler, decay_scheduler, scaler if c.amp_enable else None)
 
         gt_label_list, gt_mask_list, outputs_list, size_list = inference_meta_epoch(c, epoch, test_loader, extractor, parallel_flows, fusion_flow)
 
@@ -181,7 +212,18 @@ def train(c):
         else:
             pro_eval = False
 
-        best_det_auroc, best_loc_auroc, best_loc_pro = eval_det_loc(det_auroc_obs, loc_auroc_obs, loc_pro_obs, epoch, gt_label_list, anomaly_score, gt_mask_list, anomaly_score_map_add, anomaly_score_map_mul, pro_eval)
+        det_auroc, loc_auroc, loc_pro_auc, \
+            best_det_auroc, best_loc_auroc, best_loc_pro = \
+                eval_det_loc(det_auroc_obs, loc_auroc_obs, loc_pro_obs, epoch, gt_label_list, anomaly_score, gt_mask_list, anomaly_score_map_add, anomaly_score_map_mul, pro_eval)
+                
+        wandb_run.log(
+            {
+                'Det.AUROC': det_auroc,
+                'Loc.AUROC': loc_auroc,
+                'Loc.PRO': loc_pro_auc
+            },
+            step=epoch
+        )
 
         save_weights(epoch, parallel_flows, fusion_flow, 'last', c.ckpt_dir, optimizer)
         if best_det_auroc and c.mode == 'train':

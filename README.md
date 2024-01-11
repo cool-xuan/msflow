@@ -1,6 +1,17 @@
 # MSFlow: Multi-Scale Normalizing Flows for Unsupervised Anomaly Detection
 
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/msflow-multi-scale-flow-based-framework-for/anomaly-detection-on-visa)](https://paperswithcode.com/sota/anomaly-detection-on-visa?p=msflow-multi-scale-flow-based-framework-for)
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/msflow-multi-scale-flow-based-framework-for/anomaly-detection-on-mvtec-ad)](https://paperswithcode.com/sota/anomaly-detection-on-mvtec-ad?p=msflow-multi-scale-flow-based-framework-for)
+
 This is an official implementation of "[MSFlow: Multi-Scale Normalizing Flows for Unsupervised Anomaly Detection](https://arxiv.org/pdf/2308.15300v1.pdf)".
+
+## Inmportant Notice
+
+- [2024-01-09] We have extended our code implementation to the [VisA dataset](https://amazon-visual-anomaly.s3.us-west-2.amazonaws.com/VisA_20220922.tar). AMP of pyTorch is supported in the updated version, which can accelerate the training process. Besides, the log files on the MVTec AD dataset and VisA dataset are also provided for reference (```log_mvtec.txt``` and ```log_visa.txt```).
+
+- [2023-12-11] 🎉 Our paper has been accepted by *TNNLS 2024*, and the formal citation will be updated soon.
+
+- [2023-09-23] We have updated the [paper](https://arxiv.org/pdf/2308.15300v1.pdf) and code to the full version, which supports the MVTec AD dataset and achieves SOTA performance. 
 
 ## Abstract
 
@@ -26,17 +37,37 @@ If your folder structure is different, you may need to change the corresponding 
 
 ```shell
 MVTec
-|-- bottle
-|-----|----- ground_truth
-|-----|----- test
-|-----|--------|------ good
-|-----|--------|------ broken_large
-|-----|--------|------ ...
-|-----|----- train
-|-----|--------|------ good
-|-- cable
-|-- ...
+├── bottle
+│   ├── ground_truth
+│   │   ├── broken_large
+│   │   └── ...
+│   ├── test
+│   │   ├── good
+│   │   ├── broken_large
+│   │   └── ...
+│   └── train
+│       └── good
+├── cable
+└── ...
 ```
+
+**For VisA data**, please download from [VisA download](https://amazon-visual-anomaly.s3.us-west-2.amazonaws.com/VisA_20220922.tar). Download and extract them to `$msflow/data`, and make them look like the following data tree:
+
+```shell
+VisA
+├── candle
+│   ├── ground_truth
+│   │   └── bad
+│   ├── test
+│   │   ├── bad
+│   │   └── good
+│   └── train
+│       └── good
+├── capsules
+└── ...
+```
+
+Thanks [spot-diff](https://github.com/amazon-science/spot-diff/tree/main) for providing the code to reorganize the VisA dataset in MVTec AD format. For more details, please refer to this [data preparation guide](https://github.com/amazon-science/spot-diff/tree/main#data-preparation).
 
 ## Training and Testing
 
@@ -46,14 +77,22 @@ By default, we evaluate the model on the test set after each meta epoch, you can
 
 ### Training
 
+For MVTec AD dataset:
 ```shell
-python main.py --mode train --gpu 0 --class-name bottle --pro-eval
+CUDA_VISIBLE_DEVICES=0 python main.py --mode train \
+    --dataset mvtec --class-names all
+```
+
+For VisA dataset:
+```shell
+CUDA_VISIBLE_DEVICES=0 python main.py --mode train \
+    --dataset visa --class-names all --pro-eval
 ```
 
 ### Testing
 
 ```shell
-python main.py --mode test --gpu 0 --eavl_ckpt --class-name bottle
+CUDA_VISIBLE_DEVICES=0 python main.py --mode test --class-name bottle --eval_ckpt $PATH_OF_CKPT 
 ```
 
 
@@ -78,8 +117,40 @@ python main.py --mode test --gpu 0 --eavl_ckpt --class-name bottle
 | Zipper              |   100.0    |    99.2    |
 | **Overall Average** |  **99.7**  |  **98.8**  |
 
+## Results on the VisA benchmark
+
+| Classes             | Loc. AUPRO | Det. AUROC | Loc. AUROC |
+| ------------------- | :--------: | :--------: | :--------: |
+| candle              |    97.7    |    98.3    |    99.5    |
+| capsules            |    98.0    |    96.2    |    99.7    |
+| cashew              |    94.9    |    98.7    |    99.1    |
+| chewinggum          |    93.6    |    99.7    |    99.4    |
+| fryum               |    88.2    |    99.6    |    92.8    |
+| macaroni1           |    97.6    |    97.6    |    99.8    |
+| macaroni2           |    98.0    |    89.5    |    99.6    |
+| pcb1                |    96.0    |    98.9    |    99.8    |
+| pcb2                |    93.5    |    97.8    |    99.2    |
+| pcb3                |    94.4    |    98.9    |    99.4    |
+| pcb4                |    93.0    |    99.5    |    99.1    |
+| pipe_fryum          |    97.0    |    98.9    |    99.1    |
+| **Overall Average** |  **95.2**  |  **97.8**  |  **98.9**  |
+
 ## Thanks to
 
 - [FrEIA](https://github.com/VLL-HD/FrEIA)
 - [CFlow-AD](https://github.com/gudovskiy/cflow-ad)
 - [CSFlow](https://github.com/marco-rudolph/cs-flow)
+- [spot-diff](https://github.com/amazon-science/spot-diff/tree/main)
+
+## Citation
+
+If you find this work useful for your research, please cite our paper. The formal citation of TNNLS will be updated soon.
+
+```bibtex
+@article{zhou2023msflow,
+  title={MSFlow: Multi-Scale Flow-based Framework for Unsupervised Anomaly Detection},
+  author={Zhou, Yixuan and Xu, Xing and Song, Jingkuan and Shen, Fumin and Shen, Heng Tao},
+  journal={arXiv preprint arXiv:2308.15300},
+  year={2023}
+}
+```

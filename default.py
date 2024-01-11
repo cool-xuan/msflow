@@ -13,20 +13,17 @@ resume = False
 meta_epochs = 25 # totally 100
 sub_epochs = 4
 lr = 1e-4
-lr_decay_milestones = [75,90]
+lr_decay_milestones = [70, 90]
 lr_decay_gamma = 0.33
 lr_warmup = True
-lr_warmup_from = 0.3
+lr_warmup_from = 0.1
 lr_warmup_epochs = 3
-batch_size = 8
+batch_size = 16
 workers = 4
 
 
 # dataset
-data_path = './data/MVTec'
-# ['bottle', 'cable', 'capsule', 'carpet', 'grid',
-# 'hazelnut', 'leather', 'metal_nut', 'pill', 'screw',
-# 'tile', 'toothbrush', 'transistor', 'wood', 'zipper']
+dataset = 'mvtec' # [mvtec, visa]
 class_name = 'bottle'
 input_size = (512, 512)
 img_mean, img_std = [0.485, 0.456, 0.406], [0.229, 0.224, 0.225]

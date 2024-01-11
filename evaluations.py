@@ -70,8 +70,8 @@ def eval_det_loc(det_auroc_obs, loc_auroc_obs, loc_pro_obs, epoch, gt_label_list
     det_auroc, best_det_auroc = eval_det_auroc(det_auroc_obs, epoch, gt_label, anomaly_score)
     loc_auroc, best_loc_auroc = eval_loc_auroc(loc_auroc_obs, epoch, gt_mask, anomaly_score_map_add)
     if pro_eval:
-        seg_pro_auc, best_loc_pro = eval_seg_pro(loc_pro_obs, epoch, gt_mask, anomaly_score_map_mul)
+        loc_pro_auc, best_loc_pro = eval_seg_pro(loc_pro_obs, epoch, gt_mask, anomaly_score_map_mul)
     else:
-        seg_pro_auc, best_loc_pro = None, False
+        loc_pro_auc, best_loc_pro = None, False
 
-    return best_det_auroc, best_loc_auroc, best_loc_pro
+    return det_auroc, loc_auroc, loc_pro_auc, best_det_auroc, best_loc_auroc, best_loc_pro
