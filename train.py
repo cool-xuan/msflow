@@ -215,15 +215,16 @@ def train(c):
         det_auroc, loc_auroc, loc_pro_auc, \
             best_det_auroc, best_loc_auroc, best_loc_pro = \
                 eval_det_loc(det_auroc_obs, loc_auroc_obs, loc_pro_obs, epoch, gt_label_list, anomaly_score, gt_mask_list, anomaly_score_map_add, anomaly_score_map_mul, pro_eval)
-                
-        wandb_run.log(
-            {
-                'Det.AUROC': det_auroc,
-                'Loc.AUROC': loc_auroc,
-                'Loc.PRO': loc_pro_auc
-            },
-            step=epoch
-        )
+
+        if c.wandb_enable:
+            wandb_run.log(
+                {
+                    'Det.AUROC': det_auroc,
+                    'Loc.AUROC': loc_auroc,
+                    'Loc.PRO': loc_pro_auc
+                },
+                step=epoch
+            )
 
         save_weights(epoch, parallel_flows, fusion_flow, 'last', c.ckpt_dir, optimizer)
         if best_det_auroc and c.mode == 'train':
