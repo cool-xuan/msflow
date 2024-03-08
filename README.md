@@ -1,10 +1,8 @@
 # MSFlow: Multi-Scale Normalizing Flows for Unsupervised Anomaly Detection
 
-[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/msflow-multi-scale-flow-based-framework-for/anomaly-detection-on-visa)](https://paperswithcode.com/sota/anomaly-detection-on-visa?p=msflow-multi-scale-flow-based-framework-for)
 [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/msflow-multi-scale-flow-based-framework-for/anomaly-detection-on-mvtec-ad)](https://paperswithcode.com/sota/anomaly-detection-on-mvtec-ad?p=msflow-multi-scale-flow-based-framework-for)
 
 This is an official implementation of "[MSFlow: Multi-Scale Normalizing Flows for Unsupervised Anomaly Detection](https://arxiv.org/pdf/2308.15300v1.pdf)".
-[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/msflow-multi-scale-flow-based-framework-for/anomaly-detection-on-mvtec-ad)](https://paperswithcode.com/sota/anomaly-detection-on-mvtec-ad?p=msflow-multi-scale-flow-based-framework-for)
 
 ## Inmportant Notice
 
@@ -120,21 +118,21 @@ CUDA_VISIBLE_DEVICES=0 python main.py --mode test --class-name bottle --eval_ckp
 
 ## Results on the VisA benchmark
 
-| Classes             | Loc. AUPRO | Det. AUROC | Loc. AUROC |
-| ------------------- | :--------: | :--------: | :--------: |
-| candle              |    97.7    |    98.3    |    99.5    |
-| capsules            |    98.0    |    96.2    |    99.7    |
-| cashew              |    94.9    |    98.7    |    99.1    |
-| chewinggum          |    93.6    |    99.7    |    99.4    |
-| fryum               |    88.2    |    99.6    |    92.8    |
-| macaroni1           |    97.6    |    97.6    |    99.8    |
-| macaroni2           |    98.0    |    89.5    |    99.6    |
-| pcb1                |    96.0    |    98.9    |    99.8    |
-| pcb2                |    93.5    |    97.8    |    99.2    |
-| pcb3                |    94.4    |    98.9    |    99.4    |
-| pcb4                |    93.0    |    99.5    |    99.1    |
-| pipe_fryum          |    97.0    |    98.9    |    99.1    |
-| **Overall Average** |  **95.2**  |  **97.8**  |  **98.9**  |
+| Classes             | Det. AUROC | Loc. AUROC |
+| ------------------- | :--------: | :--------: |
+| candle              |    97.7    |    98.3    |
+| capsules            |    98.0    |    96.2    |
+| cashew              |    94.9    |    98.7    |
+| chewinggum          |    93.6    |    99.7    |
+| fryum               |    88.2    |    99.6    |
+| macaroni1           |    97.6    |    97.6    |
+| macaroni2           |    98.0    |    89.5    |
+| pcb1                |    96.0    |    98.9    |
+| pcb2                |    93.5    |    97.8    |
+| pcb3                |    94.4    |    98.9    |
+| pcb4                |    93.0    |    99.5    |
+| pipe_fryum          |    97.0    |    98.9    |
+| **Overall Average** |  **95.2**  |  **97.8**  |
 
 ## Thanks to
 
